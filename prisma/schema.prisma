@@ -1,0 +1,57 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id         Int        @id @default(autoincrement())
+  username   String     @unique @db.VarChar(80)
+  password   String
+  role       ROLE       @default(USER)
+  specifics  Specific[]
+  profile    Profile?
+  is_blocked Boolean?   @default(false)
+  created_at DateTime   @default(now())
+  updated_at DateTime   @updatedAt
+  deleted_at DateTime?
+
+  @@map("users")
+}
+
+model Profile {
+  id         Int       @id @default(autoincrement())
+  user_id    Int       @unique
+  User       User      @relation(fields: [user_id], references: [id])
+  email      String?   @db.VarChar(255)
+  phone      String?   @db.VarChar(16)
+  first_name String?   @db.VarChar(255)
+  last_name  String?   @db.VarChar(255)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("profiles")
+}
+
+model Specific {
+  id         Int       @id @default(autoincrement())
+  name       String?
+  image      String?
+  user       User[]
+  hidden     Boolean?  @default(false)
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  deleted_at DateTime?
+
+  @@map("specifics")
+}
+
+enum ROLE {
+  USER
+  DOCTOR
+  ADMIN
+}
