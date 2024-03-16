@@ -8,6 +8,8 @@ import { APP_GUARD } from '@nestjs/core';
 import { JwtAuthGuard } from 'src/shared/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/shared/guards/roles.guard';
 import { UsersService } from 'src/users/users.service';
+import { CityService } from 'src/city/city.service';
+import { ClinicService } from 'src/clinic/clinic.service';
 
 @Module({
   imports: [
@@ -24,13 +26,15 @@ import { UsersService } from 'src/users/users.service';
   controllers: [AuthController],
   providers: [
     AuthService,
-    UsersService,
     PrismaService,
     { provide: APP_GUARD, useClass: JwtAuthGuard },
     {
       provide: APP_GUARD,
       useClass: RolesGuard,
     },
+    UsersService,
+    CityService,
+    ClinicService,
   ],
 })
 export class AuthModule {}

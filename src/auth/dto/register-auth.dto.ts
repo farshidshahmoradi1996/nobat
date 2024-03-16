@@ -14,4 +14,7 @@ export class RegisterAuthDto extends LoginAuthDto {
   @MaxLength(100)
   @MinLength(3)
   last_name: string;
+
+  @ApiProperty({ enum: ['USER', 'DOCTOR'] })
+  role: string;
 }

@@ -10,7 +10,7 @@ import { LOCALES } from 'src/locales/en';
 import { ApiSuccessResponse } from 'src/shared/decorators/api-success-response.decorator';
 import { Public } from 'src/shared/decorators/public.decorator';
 import { LoginAuthResponseDto } from './entities/login.entitiy';
-import { UserEntityDto } from 'src/users/entities/user.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 
 @ApiTags('auth')
 @Controller('auth')
@@ -26,11 +26,11 @@ export class AuthController {
     return this.authService.login(loginAuthDto);
   }
 
-  @ApiSuccessResponse(UserEntityDto)
+  @ApiSuccessResponse(UserEntity)
   @Post('register')
   @Public()
   @HttpCode(200)
-  register(@Body() registerUserDto: RegisterAuthDto): Promise<UserEntityDto> {
+  register(@Body() registerUserDto: RegisterAuthDto): Promise<UserEntity> {
     return this.authService.registerUser(registerUserDto);
   }
 }

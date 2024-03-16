@@ -5,7 +5,7 @@ import { PrismaService } from 'src/prisma.service';
 import { RegisterAuthDto } from './dto/register-auth.dto';
 import { JwtService } from '@nestjs/jwt';
 import { LoginAuthResponseDto } from './entities/login.entitiy';
-import { UserEntityDto } from 'src/users/entities/user.entity';
+import { UserEntity } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
 
 @Injectable()
@@ -43,12 +43,15 @@ export class AuthService {
       findUser.username,
     );
 
+    const user = await this.userService.findUserById(findUser.id);
+
     return {
       accessToken,
       tokenType: 'Bearer',
+      user,
     };
   }
-  async registerUser(userInfo: RegisterAuthDto): Promise<UserEntityDto> {
+  async registerUser(userInfo: RegisterAuthDto): Promise<UserEntity> {
     const findUser = await this.prisma.user.findFirst({
       where: { username: userInfo.username },
     });
@@ -62,10 +65,13 @@ export class AuthService {
     // save user
     const hashedPassword = await this.generateHashedPassword(userInfo.password);
 
+    const userRole = userInfo.role === 'DOCTOR' ? userInfo.role : 'USER';
+
     const newUser = await this.prisma.user.create({
       data: {
         username: userInfo.username,
         password: hashedPassword,
+        role: userRole,
         profile: {
           create: {
             first_name: userInfo.first_name,

@@ -1,46 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { $Enums, User } from 'prisma/prisma-client';
-import { ProfileEntityDto } from './profile.entity';
-import { SpecificEntityDto } from './specific.entity';
-import { Exclude } from 'class-transformer';
+import { $Enums } from 'prisma/prisma-client';
+import { ProfileEntity } from './profile.entity';
+import { SpecificEntity } from 'src/specifics/entities/specific.entity';
 
-export class UserEntityDto implements User {
+export class UserEntity {
   @ApiProperty()
   id: number;
+
   @ApiProperty()
   username: string;
 
   @ApiProperty({ enum: $Enums.ROLE })
   role: $Enums.ROLE;
 
-  @Exclude()
-  password: string;
-  @Exclude()
-  created_at: Date;
-  @Exclude()
-  deleted_at: Date;
-  @Exclude()
-  is_blocked: boolean;
-  @Exclude()
-  updated_at: Date;
+  @ApiProperty({ type: ProfileEntity })
+  profile: ProfileEntity;
 
-  @ApiProperty()
-  profile: ProfileEntityDto;
-
-  @ApiProperty()
-  specifics: SpecificEntityDto[];
-
-  constructor({ profile, specifics, ...data }: Partial<UserEntityDto>) {
-    Object.assign(this, data);
-
-    if (profile) {
-      this.profile = new ProfileEntityDto(profile);
-    }
-
-    if (specifics) {
-      this.specifics = specifics.map(
-        (specific) => new SpecificEntityDto(specific),
-      );
-    }
-  }
+  @ApiProperty({ type: SpecificEntity, isArray: true })
+  specifics: SpecificEntity[];
 }

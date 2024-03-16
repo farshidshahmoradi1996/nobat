@@ -16,7 +16,29 @@ export class ApiSuccessDto<TData> {
   @ApiProperty()
   data: TData;
 }
-export const ApiSuccessResponse = <TModel extends Type<any>>(model: TModel) => {
+export const ApiSuccessResponse = <TModel extends Type<any>>(
+  model: TModel,
+  isArray?: boolean,
+) => {
+  if (isArray)
+    return applyDecorators(
+      ApiExtraModels(ApiSuccessDto, model),
+      ApiOkResponse({
+        schema: {
+          allOf: [
+            { $ref: getSchemaPath(ApiSuccessDto) },
+            {
+              properties: {
+                data: {
+                  type: 'array',
+                  items: { $ref: getSchemaPath(model) },
+                },
+              },
+            },
+          ],
+        },
+      }),
+    );
   return applyDecorators(
     ApiExtraModels(ApiSuccessDto, model),
     ApiOkResponse({

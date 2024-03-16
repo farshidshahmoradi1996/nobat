@@ -1,13 +1,39 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 
 import { PrismaService } from 'src/prisma.service';
-import { UserEntityDto } from './entities/user.entity';
+import { UserEntity } from './entities/user.entity';
+import { SetUserClinicDto } from './dto/set-user-clinic.dto';
+import { ClinicService, selectClinicEntity } from 'src/clinic/clinic.service';
+import { LOCALES } from 'src/locales/en';
 
+export const userSelectEntity = {
+  id: true,
+  username: true,
+  role: true,
+  profile: {
+    where: { deleted_at: null },
+    select: {
+      id: true,
+      first_name: true,
+      last_name: true,
+      email: true,
+      phone: true,
+    },
+  },
+  specifics: {
+    where: { hidden: false, deleted_at: null },
+    select: { id: true, name: true, image: true },
+  },
+  clinic: { select: selectClinicEntity, where: { deleted_at: null } },
+};
 @Injectable()
 export class UsersService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private clinicService: ClinicService,
+  ) {}
 
-  async findUserById(userId: number): Promise<UserEntityDto> {
+  async findUserById(userId: number): Promise<UserEntity> {
     if (!userId)
       throw new HttpException(
         'User Id can not be null.',
@@ -16,12 +42,30 @@ export class UsersService {
 
     const user = await this.prisma.user.findFirst({
       where: { id: userId, deleted_at: null },
-      include: {
-        profile: true,
-        specifics: { where: { hidden: false, deleted_at: null } },
-      },
+      select: userSelectEntity,
     });
 
-    return new UserEntityDto(user as any) as any;
+    return user;
+  }
+
+  async setUserClinic(setUserClinicDto: SetUserClinicDto) {
+    const user = await this.findUserById(setUserClinicDto.user_id);
+    if (!user)
+      throw new HttpException(LOCALES.USER.NOT_FOUND, HttpStatus.BAD_REQUEST);
+
+    if (user.role !== 'DOCTOR')
+      throw new HttpException(LOCALES.USER.NOT_DOCTOR, HttpStatus.BAD_REQUEST);
+
+    const clinic = await this.clinicService.findById(
+      setUserClinicDto.clinic_id,
+    );
+    if (!clinic)
+      throw new HttpException(LOCALES.CLINIC.NOT_FOUND, HttpStatus.BAD_REQUEST);
+
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { clinic_id: clinic.id },
+    });
+    return {};
   }
 }
