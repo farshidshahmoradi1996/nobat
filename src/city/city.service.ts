@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateCityDto } from './dto/create-city.dto';
 
 import { PrismaService } from 'src/prisma.service';
@@ -32,17 +32,12 @@ export class CityService {
       select: CitySelectEntity,
       where: { deleted_at: null, id },
     });
-    if (!city)
-      throw new HttpException(
-        LOCALES.CITY.CITY_NOT_FOUND,
-        HttpStatus.NOT_FOUND,
-      );
+    if (!city) throw new BadRequestException(LOCALES.CITY.CITY_NOT_FOUND);
     return city;
   }
   async remove(id: number) {
     const findCity = await this.findCityById(id);
-    if (!findCity)
-      throw new HttpException(LOCALES.CITY.NOT_FOUND, HttpStatus.NOT_FOUND);
+    if (!findCity) throw new BadRequestException(LOCALES.CITY.NOT_FOUND);
     await this.prisma.city.update({
       where: { id },
       data: { deleted_at: new Date() },

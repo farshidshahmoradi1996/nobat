@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prisma.service';
@@ -21,20 +21,14 @@ export class AuthService {
       where: { username: loginInfo.username },
     });
     if (!findUser) {
-      throw new HttpException(
-        'there is no user with this username.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('there is no user with this username.');
     }
     const isPasswordCorrect = await this.checkPassword(
       loginInfo.password,
       findUser.password,
     );
     if (!isPasswordCorrect) {
-      throw new HttpException(
-        'your username or password is wrong',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('your username or password is wrong');
     }
 
     // create Access Token
@@ -56,10 +50,7 @@ export class AuthService {
       where: { username: userInfo.username },
     });
     if (findUser) {
-      throw new HttpException(
-        'this username is now registered.',
-        HttpStatus.BAD_REQUEST,
-      );
+      throw new BadRequestException('this username is now registered.');
     }
 
     // save user

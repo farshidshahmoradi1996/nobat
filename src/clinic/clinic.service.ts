@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 
 import { PrismaService } from 'src/prisma.service';
@@ -25,11 +25,7 @@ export class ClinicService {
 
   async create(createClinicDto: CreateClinicDto): Promise<ClinicEntity> {
     const city = await this.cityService.findCityById(createClinicDto.city_id);
-    if (!city)
-      throw new HttpException(
-        LOCALES.CLINIC.CITY_ERROR,
-        HttpStatus.BAD_REQUEST,
-      );
+    if (!city) throw new BadRequestException(LOCALES.CLINIC.CITY_ERROR);
 
     const clinic = await this.prismaService.clinic.create({
       data: {
@@ -58,8 +54,7 @@ export class ClinicService {
       where: { id, deleted_at: null },
       select: selectClinicEntity,
     });
-    if (!clinic)
-      throw new HttpException(LOCALES.CLINIC.NOT_FOUND, HttpStatus.BAD_REQUEST);
+    if (!clinic) throw new BadRequestException(LOCALES.CLINIC.NOT_FOUND);
     return clinic;
   }
 }

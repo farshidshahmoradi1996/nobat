@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 import { PrismaService } from 'src/prisma.service';
 import { UserEntity } from './entities/user.entity';
@@ -34,12 +34,7 @@ export class UsersService {
   ) {}
 
   async findUserById(userId: number): Promise<UserEntity> {
-    if (!userId)
-      throw new HttpException(
-        'User Id can not be null.',
-        HttpStatus.BAD_REQUEST,
-      );
-
+    if (!userId) throw new BadRequestException('User Id can not be null');
     const user = await this.prisma.user.findFirst({
       where: { id: userId, deleted_at: null },
       select: userSelectEntity,
@@ -50,17 +45,15 @@ export class UsersService {
 
   async setUserClinic(setUserClinicDto: SetUserClinicDto) {
     const user = await this.findUserById(setUserClinicDto.user_id);
-    if (!user)
-      throw new HttpException(LOCALES.USER.NOT_FOUND, HttpStatus.BAD_REQUEST);
+    if (!user) throw new BadRequestException(LOCALES.USER.NOT_FOUND);
 
     if (user.role !== 'DOCTOR')
-      throw new HttpException(LOCALES.USER.NOT_DOCTOR, HttpStatus.BAD_REQUEST);
+      throw new BadRequestException(LOCALES.USER.NOT_DOCTOR);
 
     const clinic = await this.clinicService.findById(
       setUserClinicDto.clinic_id,
     );
-    if (!clinic)
-      throw new HttpException(LOCALES.CLINIC.NOT_FOUND, HttpStatus.BAD_REQUEST);
+    if (!clinic) throw new BadRequestException(LOCALES.CLINIC.NOT_FOUND);
 
     await this.prisma.user.update({
       where: { id: user.id },
