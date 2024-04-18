@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Get } from '@nestjs/common';
+import { Controller, Post, Body, Get, Request } from '@nestjs/common';
 import { ClinicService } from './clinic.service';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 
@@ -24,8 +24,8 @@ export class ClinicController {
 
   @Post()
   @ApiSuccessResponse(ClinicEntity)
-  @Roles(Role.Admin)
-  createClinic(@Body() clinicDto: CreateClinicDto) {
-    return this.clinicService.create(clinicDto);
+  @Roles(Role.Doctor)
+  createClinic(@Body() clinicDto: CreateClinicDto, @Request() req) {
+    return this.clinicService.create(clinicDto, req.user.id);
   }
 }

@@ -4,6 +4,7 @@ import { CreateCityDto } from './dto/create-city.dto';
 import { PrismaService } from 'src/prisma.service';
 import { LOCALES } from 'src/locales/en';
 import { CityEntity } from './entities/city.entity';
+
 export const CitySelectEntity = { id: true, name: true };
 @Injectable()
 export class CityService {
@@ -35,6 +36,7 @@ export class CityService {
     if (!city) throw new BadRequestException(LOCALES.CITY.CITY_NOT_FOUND);
     return city;
   }
+
   async remove(id: number) {
     const findCity = await this.findCityById(id);
     if (!findCity) throw new BadRequestException(LOCALES.CITY.NOT_FOUND);
@@ -42,6 +44,6 @@ export class CityService {
       where: { id },
       data: { deleted_at: new Date() },
     });
-    return {};
+    return null;
   }
 }

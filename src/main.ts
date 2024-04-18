@@ -6,6 +6,7 @@ import { ValidationPipe } from '@nestjs/common';
 import { TimeoutInterceptor } from './shared/interceptors/timeout.interceptor';
 import { TransformInterceptor } from './shared/interceptors/transform.interceptor';
 import { ErrorsInterceptor } from './shared/interceptors/errors.interceptor';
+import { cyan } from 'colors';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -19,8 +20,10 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new ErrorsInterceptor());
 
-  // config swagger
+  // global validation
+  app.useGlobalPipes(new ValidationPipe());
 
+  // config swagger
   const config = new DocumentBuilder()
     .setTitle('Nobat')
     .setDescription('The Nobat API description')
@@ -31,10 +34,17 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api/swagger', app, document);
 
-  // global validation
-  app.useGlobalPipes(new ValidationPipe());
+  // read port
+  const port = process.env.PORT;
 
   // listen app
-  await app.listen(3000);
+  await app.listen(port);
+
+  // log Swagger url
+  console.log(
+    cyan(
+      `🤩 Swagger Is available for you at : http://localhost:${port}/api/swagger 🤩`,
+    ),
+  );
 }
 bootstrap();

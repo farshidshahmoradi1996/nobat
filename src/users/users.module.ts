@@ -6,7 +6,6 @@ import { ClinicService } from 'src/clinic/clinic.service';
 import { CityService } from 'src/city/city.service';
 
 @Module({
-  imports: [],
   controllers: [UsersController],
   providers: [UsersService, PrismaService, ClinicService, CityService],
   exports: [UsersService],

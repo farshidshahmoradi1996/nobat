@@ -7,6 +7,6 @@ import { CityService } from 'src/city/city.service';
 
 @Module({
   controllers: [ClinicController],
-  providers: [ClinicService, UsersService, PrismaService, CityService],
+  providers: [ClinicService, PrismaService, CityService, UsersService],
 })
 export class ClinicModule {}

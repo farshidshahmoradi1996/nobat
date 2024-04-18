@@ -1,10 +1,16 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 import { CreateClinicDto } from './dto/create-clinic.dto';
 
 import { PrismaService } from 'src/prisma.service';
 import { LOCALES } from 'src/locales/en';
 import { ClinicEntity } from './entities/clinic.entity';
 import { CityService } from 'src/city/city.service';
+import { UsersService } from 'src/users/users.service';
 
 export const selectClinicEntity = {
   id: true,
@@ -21,10 +27,16 @@ export class ClinicService {
   constructor(
     private cityService: CityService,
     private prismaService: PrismaService,
+    @Inject(forwardRef(() => UsersService))
+    private usersService: UsersService,
   ) {}
 
-  async create(createClinicDto: CreateClinicDto): Promise<ClinicEntity> {
+  async create(
+    createClinicDto: CreateClinicDto,
+    userId?: number,
+  ): Promise<ClinicEntity> {
     const city = await this.cityService.findCityById(createClinicDto.city_id);
+
     if (!city) throw new BadRequestException(LOCALES.CLINIC.CITY_ERROR);
 
     const clinic = await this.prismaService.clinic.create({
@@ -38,6 +50,14 @@ export class ClinicService {
       },
       select: selectClinicEntity,
     });
+
+    // set user clinic
+    if (userId)
+      await this.usersService.setUserClinic({
+        clinic_id: clinic.id,
+        user_id: userId,
+      });
+
     return clinic;
   }
 

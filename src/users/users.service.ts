@@ -1,4 +1,9 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  forwardRef,
+} from '@nestjs/common';
 
 import { PrismaService } from 'src/prisma.service';
 import { UserEntity } from './entities/user.entity';
@@ -30,6 +35,7 @@ export const userSelectEntity = {
 export class UsersService {
   constructor(
     private prisma: PrismaService,
+    @Inject(forwardRef(() => ClinicService))
     private clinicService: ClinicService,
   ) {}
 
